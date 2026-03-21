@@ -1,29 +1,218 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Select Role</title>
-<link rel="stylesheet" href="index.css">
-</head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose Your Role — Drowziness</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      flex-direction: column;
+      gap: 32px;
+    }
 
+    .back-link {
+      position: fixed;
+      top: 24px; left: 24px;
+      font-size: 13px;
+      color: var(--muted2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    .page-header { text-align: center; }
+
+    .page-header .tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .page-header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: var(--muted2);
+    }
+
+    /* Role cards */
+    .role-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    @media (max-width: 580px) {
+      .role-grid { grid-template-columns: 1fr; }
+    }
+
+    .role-pick {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 18px;
+      padding: 36px 28px;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-pick::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.25s;
+      pointer-events: none;
+    }
+
+    .role-pick.driver-pick::after  { background: radial-gradient(ellipse at 50% 110%, rgba(249,115,22,0.12), transparent 70%); }
+    .role-pick.student-pick::after { background: radial-gradient(ellipse at 50% 110%, rgba(34,211,238,0.12), transparent 70%); }
+
+    .role-pick:hover::after { opacity: 1; }
+    .role-pick.driver-pick:hover  { border-color: rgba(249,115,22,0.6); transform: translateY(-4px); }
+    .role-pick.student-pick:hover { border-color: rgba(34,211,238,0.6); transform: translateY(-4px); }
+
+    .role-pick-icon {
+      font-size: 52px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .role-pick h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .role-pick p {
+      font-size: 13px;
+      color: var(--muted2);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .role-pick ul {
+      list-style: none;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .role-pick ul li {
+      font-size: 12px;
+      color: var(--muted2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .role-pick ul li::before {
+      content: '✓';
+      font-size: 11px;
+      font-weight: 700;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .driver-pick ul li::before { background: var(--driver-dim);  color: var(--driver); }
+    .student-pick ul li::before { background: var(--student-dim); color: var(--student); }
+
+    .pick-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .pick-btn:hover { opacity: 0.85; }
+
+    .driver-pick  .pick-btn { background: var(--driver);  color: #fff; }
+    .student-pick .pick-btn { background: var(--student); color: #080c14; }
+  </style>
+</head>
 <body>
 
-<h1>Select Your Role</h1>
+  <a href="home.html" class="back-link">← Back to home</a>
 
-<div class="card-container">
+  <!-- Background glows -->
+  <div style="position:fixed;width:500px;height:500px;border-radius:50%;top:-150px;left:-100px;background:radial-gradient(ellipse,rgba(249,115,22,0.06),transparent 70%);pointer-events:none;z-index:0;"></div>
+  <div style="position:fixed;width:500px;height:500px;border-radius:50%;bottom:-150px;right:-100px;background:radial-gradient(ellipse,rgba(34,211,238,0.06),transparent 70%);pointer-events:none;z-index:0;"></div>
 
-<div class="card" onclick="selectRole('student')">
-<h2>Student</h2>
-<p>Learning and monitoring system</p>
-</div>
+  <div class="page-header fade-up" style="position:relative;z-index:1;">
+    <div class="tag">Step 1 of 2</div>
+    <h1>Who are you?</h1>
+    <p>Choose your role to get started with the right experience.</p>
+  </div>
 
-<div class="card" onclick="selectRole('driver')">
-<h2>Driver / Adult</h2>
-<p>Drowsiness detection while driving</p>
-</div>
+  <div class="role-grid" style="position:relative;z-index:1;">
 
-</div>
+    <!-- Driver -->
+    <div class="role-pick driver-pick fade-up delay-1" onclick="goToAuth('driver')">
+      <span class="role-pick-icon">🚗</span>
+      <h2>Driver</h2>
+      <p>Real-time eye monitoring to keep you safe on the road.</p>
+      <ul>
+        <li>Live drowsiness detection</li>
+        <li>Instant audio alerts</li>
+        <li>Drive session reports</li>
+        <li>Safety score tracking</li>
+      </ul>
+      <button class="pick-btn">Continue as Driver</button>
+    </div>
 
-<script src="index.js"></script>
+    <!-- Student -->
+    <div class="role-pick student-pick fade-up delay-2" onclick="goToAuth('student')">
+      <span class="role-pick-icon">🎓</span>
+      <h2>Student</h2>
+      <p>Focus monitoring and smart break reminders for study sessions.</p>
+      <ul>
+        <li>Focus session tracking</li>
+        <li>Break reminders</li>
+        <li>Weekly focus reports</li>
+        <li>Study goal setting</li>
+      </ul>
+      <button class="pick-btn">Continue as Student</button>
+    </div>
+
+  </div>
+
+  <script>
+    function goToAuth(role) {
+      localStorage.setItem('selectedRole', role);
+      window.location.href = 'auth.html?role=' + role;
+    }
+  </script>
 
 </body>
 </html>

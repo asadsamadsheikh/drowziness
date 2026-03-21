@@ -1,35 +1,426 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>AI Drowsiness Detector</title>
-<link rel="stylesheet" href="index.css">
-</head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drowziness — AI Eye Detection</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Home-specific ── */
+    body { overflow-x: hidden; }
 
+    /* Sidebar nav links for home */
+    .nav-cta {
+      margin-top: auto;
+      background: var(--student);
+      color: #080c14;
+      border-radius: 9px;
+      padding: 11px 14px;
+      font-weight: 500;
+      text-align: center;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.85; color: #080c14; background: var(--student); }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 64px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      top: -100px; right: -100px;
+      background: radial-gradient(ellipse, rgba(34,211,238,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-glow2 {
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      bottom: 0; left: 10%;
+      background: radial-gradient(ellipse, rgba(249,115,22,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--student);
+      background: var(--student-dim);
+      border: 1px solid rgba(34,211,238,0.2);
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 28px;
+      width: fit-content;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--student);
+      animation: pulse 2s ease infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 800;
+      line-height: 1.1;
+      max-width: 680px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: var(--student);
+    }
+
+    .hero p {
+      font-size: 17px;
+      color: var(--muted2);
+      max-width: 480px;
+      margin-bottom: 40px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+
+    /* Stats row */
+    .stats {
+      display: flex;
+      gap: 40px;
+      margin-top: 64px;
+      padding-top: 40px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 120px;
+    }
+    .stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 2px;
+    }
+
+    /* How it works */
+    .section {
+      padding: 80px 64px;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .section h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 48px;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .step-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-card::before {
+      content: attr(data-num);
+      position: absolute;
+      top: -10px; right: 16px;
+      font-family: 'Syne', sans-serif;
+      font-size: 72px;
+      font-weight: 800;
+      color: var(--border);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .step-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .step-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .step-card p {
+      font-size: 13px;
+      color: var(--muted2);
+      line-height: 1.6;
+    }
+
+    /* Roles section */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .roles-grid { grid-template-columns: 1fr; }
+    }
+
+    .role-card {
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-card.driver-card {
+      background: linear-gradient(135deg, var(--card) 60%, var(--driver-dim));
+    }
+    .role-card.driver-card:hover { border-color: rgba(249,115,22,0.5); }
+
+    .role-card.student-card {
+      background: linear-gradient(135deg, var(--card) 60%, var(--student-dim));
+    }
+    .role-card.student-card:hover { border-color: rgba(34,211,238,0.5); }
+
+    .role-emoji { font-size: 40px; margin-bottom: 16px; display: block; }
+
+    .role-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .role-card p {
+      font-size: 13px;
+      color: var(--muted2);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .role-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+    .tag-driver  { background: var(--driver-dim);  color: var(--driver); }
+    .tag-student { background: var(--student-dim); color: var(--student); }
+
+    @media (max-width: 768px) {
+      .hero    { padding: 100px 24px 60px; }
+      .section { padding: 60px 24px; }
+      .stats   { gap: 24px; }
+    }
+  </style>
+</head>
 <body>
 
-<div class="menu-btn" onclick="toggleMenu()">☰</div>
+  <!-- Hamburger for mobile -->
+  <div class="hamburger" onclick="toggleSidebar()" id="hamburger">☰</div>
 
-<div id="sidebar" class="sidebar">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">Drow<span>ziness</span></div>
+    <nav>
+      <span class="nav-section">Menu</span>
+      <a href="home.html" class="nav-link active">
+        <span class="icon">⌂</span> Home
+      </a>
+      <a href="#how-it-works" class="nav-link">
+        <span class="icon">◎</span> How it works
+      </a>
+      <a href="#roles" class="nav-link">
+        <span class="icon">◈</span> Who is it for
+      </a>
+      <a href="#about" class="nav-link">
+        <span class="icon">◇</span> About
+      </a>
 
-<h2>Navigation</h2>
+      <span class="nav-section">Account</span>
+      <a href="role.html" class="nav-link">
+        <span class="icon">→</span> Login / Sign up
+      </a>
 
-<a href="home.html">Home</a>
-<a href="#">About</a>
-<a href="#">How it Works</a>
-<a href="role.html" class="login-btn">Login / Signup</a>
+      <div style="flex:1"></div>
+      <a href="role.html" class="nav-cta">Get Started Free</a>
+    </nav>
+  </aside>
 
-</div>
+  <!-- Main -->
+  <main class="main-content">
 
-<div class="main">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-glow"></div>
+      <div class="hero-glow2"></div>
 
-<h1>AI Eye Drowsiness Detection</h1>
-<p>Stay alert while driving. Our AI monitors your eyes.</p>
+      <div class="hero-badge fade-up">AI-Powered · Free to use</div>
 
-<button onclick="location.href='role.html'">Get Started</button>
+      <h1 class="fade-up delay-1">
+        Stay alert.<br>
+        <em>Never miss</em> a moment.
+      </h1>
 
-</div>
+      <p class="fade-up delay-2">
+        Real-time AI drowsiness detection for drivers and students.
+        Your camera, your safety — powered by computer vision.
+      </p>
 
-<script src="index.js"></script>
+      <div class="hero-btns fade-up delay-3">
+        <a href="role.html" class="btn btn-student">Get Started Free</a>
+        <a href="#how-it-works" class="btn btn-outline">See how it works</a>
+      </div>
+
+      <div class="stats fade-up delay-4">
+        <div class="stat-item">
+          <div class="stat-num">99%</div>
+          <div class="stat-label">Detection accuracy</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">&lt;1s</div>
+          <div class="stat-label">Alert response</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">Free</div>
+          <div class="stat-label">Always free</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">2-in-1</div>
+          <div class="stat-label">Driver + Student</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="section" id="how-it-works">
+      <div class="section-tag">Process</div>
+      <h2>How it works</h2>
+
+      <div class="steps-grid">
+        <div class="step-card fade-up" data-num="1">
+          <span class="step-icon">👤</span>
+          <h3>Create account</h3>
+          <p>Sign up as a driver or student. Takes under 30 seconds.</p>
+        </div>
+        <div class="step-card fade-up delay-1" data-num="2">
+          <span class="step-icon">📷</span>
+          <h3>Allow camera</h3>
+          <p>Grant webcam access. Your video never leaves your device.</p>
+        </div>
+        <div class="step-card fade-up delay-2" data-num="3">
+          <span class="step-icon">🤖</span>
+          <h3>AI monitors eyes</h3>
+          <p>Our model tracks blink rate, eye closure, and head position.</p>
+        </div>
+        <div class="step-card fade-up delay-3" data-num="4">
+          <span class="step-icon">🔔</span>
+          <h3>Get alerted</h3>
+          <p>Instant sound + visual alert the moment drowsiness is detected.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Who is it for -->
+    <section class="section" id="roles">
+      <div class="section-tag">Users</div>
+      <h2>Who is it for?</h2>
+
+      <div class="roles-grid">
+        <div class="role-card driver-card fade-up" onclick="location.href='role.html'">
+          <span class="role-emoji">🚗</span>
+          <h3>Drivers</h3>
+          <p>Long-distance drivers, truck operators, and daily commuters who need to stay alert on the road.</p>
+          <span class="role-tag tag-driver">Driver mode</span>
+        </div>
+        <div class="role-card student-card fade-up delay-1" onclick="location.href='role.html'">
+          <span class="role-emoji">🎓</span>
+          <h3>Students</h3>
+          <p>Students studying late who need focus monitoring, break reminders, and session reports.</p>
+          <span class="role-tag tag-student">Student mode</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section class="section" id="about" style="border-bottom: 1px solid var(--border);">
+      <div class="section-tag">About</div>
+      <h2>Built for safety</h2>
+      <p style="max-width:560px; color:var(--muted2); font-size:15px; line-height:1.8; font-weight:300;">
+        Drowziness is a free, open AI tool built to reduce fatigue-related accidents and help students study smarter.
+        Your camera feed is processed entirely in your browser — nothing is recorded or uploaded.
+        All session data is stored securely in your personal account.
+      </p>
+      <div style="margin-top:32px;">
+        <a href="role.html" class="btn btn-student">Get Started Free</a>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+    // Close sidebar when clicking a nav link on mobile
+    document.querySelectorAll('.nav-link, .nav-cta').forEach(link => {
+      link.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('open');
+      });
+    });
+  </script>
 
 </body>
 </html>

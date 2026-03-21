@@ -1,30 +1,146 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Login / Signup</title>
-<link rel="stylesheet" href="index.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Signup — Drowziness</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .back-link {
+      position: fixed; top: 24px; left: 24px;
+      font-size: 13px; color: var(--muted2);
+      display: flex; align-items: center; gap: 6px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text); }
+    .brand {
+      font-family: 'Syne', sans-serif; font-size: 13px;
+      font-weight: 700; letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .brand span { color: var(--student); }
+    .form-card {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 18px; padding: 36px 32px;
+      width: 100%; max-width: 420px; transition: border-color 0.3s;
+    }
+    .form-card.mode-driver  { border-color: rgba(249,115,22,0.3);  --accent: var(--driver); }
+    .form-card.mode-student { border-color: rgba(34,211,238,0.3);  --accent: var(--student); }
+    .role-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 4px 12px;
+      border-radius: 999px; margin-bottom: 16px;
+    }
+    .pill-driver  { background: var(--driver-dim);  color: var(--driver); }
+    .pill-student { background: var(--student-dim); color: var(--student); }
+    .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .form-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .form-sub   { font-size: 13px; color: var(--muted2); margin-bottom: 24px; }
+    .tab-row    { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
+    .tab-btn {
+      font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+      padding: 8px 18px; border: none; background: transparent;
+      color: var(--muted2); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s;
+    }
+    .tab-btn.active { color: var(--text); border-bottom-color: var(--accent, var(--student)); }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field label {
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.09em;
+    }
+    .field input, .field select {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 9px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      padding: 11px 14px; outline: none;
+      transition: border-color 0.2s; width: 100%;
+    }
+    .field input::placeholder { color: var(--muted); }
+    .field input:focus, .field select:focus { border-color: var(--accent, var(--student)); }
+    .field select option { background: var(--card); }
+    .submit-btn {
+      width: 100%; padding: 13px; border-radius: 10px; border: none;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500;
+      cursor: pointer; margin-top: 6px;
+      transition: opacity 0.2s, transform 0.15s;
+      background: var(--accent, var(--student));
+    }
+    .submit-btn:hover  { opacity: 0.86; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn.driver-btn  { color: #fff; }
+    .submit-btn.student-btn { color: #080c14; }
+    .error-msg { font-size: 12px; color: var(--danger); margin-top: 10px; text-align: center; min-height: 16px; }
+  </style>
 </head>
-
 <body>
-
-<h1 id="roleTitle"></h1>
-
-<div class="form-box">
-
-<h2>Login</h2>
-
-<input type="text" placeholder="Email">
-<input type="password" placeholder="Password">
-
-<button onclick="login()">Login</button>
-
-<p>or</p>
-
-<button>Sign Up</button>
-
-</div>
-
-<script src="index.js"></script>
-
+  <a href="role.html" class="back-link">← Change role</a>
+  <div class="brand fade-up">Drow<span>ziness</span></div>
+  <div class="form-card fade-up delay-1 mode-driver" id="formCard">
+    <div class="role-pill pill-driver" id="rolePill">
+      <span class="pill-dot"></span><span id="pillText">Driver Mode</span>
+    </div>
+    <div class="form-title" id="formTitle">Welcome back</div>
+    <div class="form-sub"   id="formSub">Login to your driver account</div>
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabLogin"  onclick="setTab('login')">Login</button>
+      <button class="tab-btn"        id="tabSignup" onclick="setTab('signup')">Sign Up</button>
+    </div>
+    <!-- LOGIN -->
+    <div id="loginSection">
+      <div class="field"><label>Email</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••"></div>
+      <button class="submit-btn driver-btn" id="loginBtn" onclick="doLogin()">Login</button>
+    </div>
+    <!-- SIGNUP -->
+    <div id="signupSection" class="hidden">
+      <div class="field"><label>Full Name</label>
+        <input type="text" id="signupName" placeholder="Your full name"></div>
+      <div class="field"><label>Email</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com"></div>
+      <div class="field"><label>Password</label>
+        <input type="password" id="signupPass" placeholder="Min 6 characters"></div>
+      <!-- Student only -->
+      <div id="studentFields" class="hidden">
+        <div class="field"><label>Roll Number / Student ID</label>
+          <input type="text" id="signupRoll" placeholder="e.g. STU2024001"></div>
+        <div class="field"><label>Class / Grade</label>
+          <input type="text" id="signupClass" placeholder="e.g. 12th / B.Tech 2nd Year"></div>
+        <div class="field"><label>Daily Study Goal</label>
+          <select id="signupGoal">
+            <option value="">Select goal</option>
+            <option value="1">1 hour</option><option value="2">2 hours</option>
+            <option value="3">3 hours</option><option value="4">4 hours</option>
+            <option value="5">5+ hours</option>
+          </select></div>
+      </div>
+      <!-- Driver only -->
+      <div id="driverFields" class="hidden">
+        <div class="field"><label>Vehicle Type</label>
+          <select id="signupVehicle">
+            <option value="">Select vehicle</option>
+            <option value="car">Car</option><option value="truck">Truck</option>
+            <option value="bus">Bus</option><option value="bike">Bike</option>
+          </select></div>
+        <div class="field"><label>License Number</label>
+          <input type="text" id="signupLicense" placeholder="e.g. MH12AB1234"></div>
+      </div>
+      <button class="submit-btn driver-btn" id="signupBtn" onclick="doSignup()">Create Account</button>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+  <script src="auth.js"></script>
 </body>
 </html>
