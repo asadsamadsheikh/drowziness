@@ -32,7 +32,9 @@ body {
   line-height: 1.6;
 }
 
-a { text-decoration: none; color: inherit; }
+a { 
+  text-decoration: none; color: inherit; 
+}
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 5px; }
@@ -51,9 +53,16 @@ body::before {
 }
 
 /* ── Utility ── */
-.hidden  { display: none !important; }
-.flex    { display: flex; }
-.center  { align-items: center; justify-content: center; }
+.hidden  { 
+  display: none !important; 
+}
+.flex    { 
+  display: flex; 
+}
+.center  { 
+  align-items: center; 
+  justify-content: center; 
+}
 
 /* ── Buttons ── */
 .btn {
@@ -70,17 +79,31 @@ body::before {
   cursor: pointer;
   transition: opacity 0.2s, transform 0.15s;
 }
-.btn:hover  { opacity: 0.85; }
-.btn:active { transform: scale(0.97); }
+.btn:hover  { 
+  opacity: 0.85; 
+}
+.btn:active { 
+  transform: scale(0.97); 
+}
 
-.btn-driver  { background: var(--driver);  color: #fff; }
-.btn-student { background: var(--student); color: #080c14; }
+.btn-driver  { 
+  background: var(--driver);  
+  color: #fff; 
+}
+.btn-student { 
+  background: var(--student); 
+  color: #080c14; 
+}
 .btn-outline {
   background: transparent;
   border: 1px solid var(--border2);
   color: var(--muted2);
 }
-.btn-outline:hover { border-color: var(--text); color: var(--text); opacity: 1; }
+.btn-outline:hover { 
+  border-color: var(--text); 
+  color: var(--text); 
+  opacity: 1; 
+}
 
 /* ── Cards ── */
 .card {
@@ -90,7 +113,9 @@ body::before {
   padding: 28px;
   transition: border-color 0.25s, transform 0.2s;
 }
-.card:hover { transform: translateY(-2px); }
+.card:hover { 
+  transform: translateY(-2px); 
+}
 
 /* ── Sidebar shared ── */
 .sidebar {
@@ -118,7 +143,9 @@ body::before {
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
 }
-.sidebar-logo span { color: var(--student); }
+.sidebar-logo span { 
+  color: var(--student); 
+}
 
 .sidebar nav {
   display: flex;
@@ -139,9 +166,19 @@ body::before {
   transition: all 0.2s;
   cursor: pointer;
 }
-.nav-link:hover  { background: var(--card); color: var(--text); }
-.nav-link.active { background: var(--card2); color: var(--text); }
-.nav-link .icon  { font-size: 16px; width: 20px; text-align: center; }
+.nav-link:hover  { 
+  background: var(--card); 
+  color: var(--text); 
+}
+.nav-link.active { 
+  background: var(--card2); 
+  color: var(--text); 
+}
+.nav-link .icon  { 
+  font-size: 16px; 
+  width: 20px; 
+  text-align: center; 
+}
 
 .nav-section {
   font-size: 10px;
