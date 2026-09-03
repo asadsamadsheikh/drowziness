@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drowziness — AI Eye Detection</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    :root { --sidebar-w: 240px; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
+      background: var(--bg2); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 28px 20px; z-index: 100;
+      transition: transform 0.3s;
+    }
+    .sidebar-logo { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+    .sidebar-logo span { color: var(--student); }
+    .sidebar nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 9px; font-size: 14px; color: var(--muted2); transition: all 0.2s; cursor: pointer; }
+    .nav-link:hover  { background: var(--card); color: var(--text); }
+    .nav-link.active { background: var(--card2); color: var(--text); }
+    .nav-link .icon  { font-size: 16px; width: 20px; text-align: center; }
+    .nav-section { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); padding: 16px 14px 6px; }
+    .nav-cta { background: var(--student); color: #080c14 !important; border-radius: 9px; padding: 11px 14px; font-weight: 500; text-align: center; margin-top: 8px; transition: opacity 0.2s; }
+    .nav-cta:hover { opacity: 0.85; background: var(--student); }
+    .main-content { margin-left: var(--sidebar-w); }
+
+    /* Hero */
+    .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 60px 64px; position: relative; overflow: hidden; }
+    .hero-glow1 { position: absolute; width: 600px; height: 600px; border-radius: 50%; top: -100px; right: -100px; background: radial-gradient(ellipse, rgba(34,211,238,0.07), transparent 70%); pointer-events: none; }
+    .hero-glow2 { position: absolute; width: 400px; height: 400px; border-radius: 50%; bottom: 0; left: 10%; background: radial-gradient(ellipse, rgba(249,115,22,0.06), transparent 70%); pointer-events: none; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--student); background: var(--student-dim); border: 1px solid rgba(34,211,238,0.2); padding: 6px 14px; border-radius: 999px; margin-bottom: 28px; width: fit-content; }
+    .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--student); animation: blink 2s ease infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(36px,5vw,64px); font-weight: 800; line-height: 1.1; max-width: 680px; margin-bottom: 20px; }
+    .hero h1 em { font-style: normal; color: var(--student); }
+    .hero p { font-size: 17px; color: var(--muted2); max-width: 480px; margin-bottom: 40px; line-height: 1.7; font-weight: 300; }
+    .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+    .stats { display: flex; gap: 40px; margin-top: 64px; padding-top: 40px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; }
+    .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px; }
+
+    /* Sections */
+    .section { padding: 80px 64px; border-top: 1px solid var(--border); }
+    .section-tag { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .section h2 { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 700; margin-bottom: 48px; }
+
+    /* Steps */
+    .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 20px; }
+    .step-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; position: relative; overflow: hidden; }
+    .step-card::before { content: attr(data-num); position: absolute; top: -10px; right: 16px; font-family: 'Syne', sans-serif; font-size: 72px; font-weight: 800; color: var(--border); line-height: 1; pointer-events: none; }
+    .step-icon { font-size: 28px; margin-bottom: 16px; display: block; }
+    .step-card h3 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .step-card p  { font-size: 13px; color: var(--muted2); line-height: 1.6; }
+
+    /* Role cards */
+    .roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .role-card { border-radius: var(--radius); padding: 36px 32px; border: 1px solid var(--border); cursor: pointer; transition: all 0.25s; position: relative; overflow: hidden; }
+    .role-card.driver-card  { background: linear-gradient(135deg, var(--card) 60%, var(--driver-dim)); }
+    .role-card.student-card { background: linear-gradient(135deg, var(--card) 60%, var(--student-dim)); }
+    .role-card.driver-card:hover  { border-color: rgba(249,115,22,0.5); transform: translateY(-3px); }
+    .role-card.student-card:hover { border-color: rgba(34,211,238,0.5); transform: translateY(-3px); }
+    .role-emoji { font-size: 40px; margin-bottom: 16px; display: block; }
+    .role-card h3 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .role-card p  { font-size: 13px; color: var(--muted2); margin-bottom: 24px; line-height: 1.6; }
+    .role-tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border-radius: 999px; }
+    .tag-driver  { background: var(--driver-dim);  color: var(--driver); }
+    .tag-student { background: var(--student-dim); color: var(--student); }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+      .hero    { padding: 100px 24px 60px; }
+      .section { padding: 60px 24px; }
+      .roles-grid { grid-template-columns: 1fr; }
+      .stats { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">Drow<span>ziness</span></div>
+    <nav>
+      <span class="nav-section">Menu</span>
+      <a href="home.html" class="nav-link active"><span class="icon">⌂</span> Home</a>
+      <a href="#how-it-works" class="nav-link"><span class="icon">◎</span> How it works</a>
+      <a href="#roles" class="nav-link"><span class="icon">◈</span> Who is it for</a>
+      <a href="#about" class="nav-link"><span class="icon">◇</span> About</a>
+      <span class="nav-section">Account</span>
+      <a href="role.html" class="nav-link"><span class="icon">→</span> Login / Sign up</a>
+      <div style="flex:1"></div>
+      <a href="role.html" class="nav-link nav-cta">Get Started Free</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <section class="hero">
+      <div class="hero-glow1"></div>
+      <div class="hero-glow2"></div>
+      <div class="hero-badge fade-up">AI-Powered · Free to use</div>
+      <h1 class="fade-up delay-1">Stay alert.<br><em>Never miss</em> a moment.</h1>
+      <p class="fade-up delay-2">Real-time AI drowsiness detection for drivers and students. Your camera, your safety — powered by computer vision.</p>
+      <div class="hero-btns fade-up delay-3">
+        <a href="role.html" class="btn btn-student">Get Started Free</a>
+        <a href="#how-it-works" class="btn btn-outline">See how it works</a>
+      </div>
+      <div class="stats fade-up delay-4">
+        <div><div class="stat-num">99%</div><div class="stat-label">Detection accuracy</div></div>
+        <div><div class="stat-num">&lt;1s</div><div class="stat-label">Alert response</div></div>
+        <div><div class="stat-num">Free</div><div class="stat-label">Always free</div></div>
+        <div><div class="stat-num">2-in-1</div><div class="stat-label">Driver + Student</div></div>
+      </div>
+    </section>
+
+    <section class="section" id="how-it-works">
+      <div class="section-tag">Process</div>
+      <h2>How it works</h2>
+      <div class="steps-grid">
+        <div class="step-card fade-up" data-num="1"><span class="step-icon">👤</span><h3>Create account</h3><p>Sign up as a driver or student. Takes under 30 seconds.</p></div>
+        <div class="step-card fade-up delay-1" data-num="2"><span class="step-icon">📷</span><h3>Allow camera</h3><p>Grant webcam access. Your video never leaves your device.</p></div>
+        <div class="step-card fade-up delay-2" data-num="3"><span class="step-icon">🤖</span><h3>AI monitors eyes</h3><p>Tracks blink rate, eye closure, and head position in real time.</p></div>
+        <div class="step-card fade-up delay-3" data-num="4"><span class="step-icon">🔔</span><h3>Get alerted</h3><p>Instant sound and visual alert the moment drowsiness is detected.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="roles">
+      <div class="section-tag">Users</div>
+      <h2>Who is it for?</h2>
+      <div class="roles-grid">
+        <div class="role-card driver-card fade-up" onclick="location.href='role.html'">
+          <span class="role-emoji">🚗</span>
+          <h3>Drivers</h3>
+          <p>Long-distance drivers, truck operators, and daily commuters who need to stay alert on the road.</p>
+          <span class="role-tag tag-driver">Driver mode</span>
+        </div>
+        <div class="role-card student-card fade-up delay-1" onclick="location.href='role.html'">
+          <span class="role-emoji">🎓</span>
+          <h3>Students</h3>
+          <p>Students studying late who need focus monitoring, break reminders, and session reports.</p>
+          <span class="role-tag tag-student">Student mode</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about" style="border-bottom:1px solid var(--border)">
+      <div class="section-tag">About</div>
+      <h2>Built for safety</h2>
+      <p style="max-width:560px;color:var(--muted2);font-size:15px;line-height:1.8;font-weight:300;">Drowziness is a free, open AI tool built to reduce fatigue-related accidents and help students study smarter. Your camera feed is processed entirely in your browser — nothing is recorded or uploaded.</p>
+      <div style="margin-top:32px;"><a href="role.html" class="btn btn-student">Get Started Free</a></div>
+    </section>
+  </main>
+</body>
+</html>
