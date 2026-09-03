@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from datetime import datetime
 
-import models, schemas, database, auth
+from backend import models, schemas, database, auth
 
 models.Base.metadata.create_all(bind=database.engine)
 
