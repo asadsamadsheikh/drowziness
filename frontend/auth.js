@@ -214,7 +214,7 @@ function setLoading(buttonId, loading, text) {
 async function doLogin() {
 
     const email =
-        document.getElementById("loginEmail").value.trim();
+        document.getElementById("loginEmail").value.trim().toLowerCase();
 
     const pass =
         document.getElementById("loginPass").value;
@@ -338,7 +338,7 @@ async function doSignup() {
         document.getElementById("signupName").value.trim();
 
     const email =
-        document.getElementById("signupEmail").value.trim();
+        document.getElementById("signupEmail").value.trim().toLowerCase();
 
     const pass =
         document.getElementById("signupPass").value;

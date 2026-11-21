@@ -73,7 +73,7 @@ def create_token(email: str) -> str:
     )
 
     payload = {
-        "sub": email,
+        "sub": email.strip().lower(),
         "exp": expire_time
     }
 

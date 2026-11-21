@@ -1,3 +1,5 @@
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import text, func
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -12,6 +14,11 @@ from backend import models, schemas, database, auth
 # ============================================================
 
 models.Base.metadata.create_all(bind=database.engine)
+with database.engine.begin() as connection:
+    connection.execute(text(
+        "CREATE UNIQUE INDEX IF NOT EXISTS ix_users_email_lower "
+        "ON users (lower(email))"
+    ))
 
 
 # ============================================================
@@ -65,9 +72,10 @@ def get_current_user(
             detail="Invalid or expired token"
         )
 
+    normalized_email = email.strip().lower()
     user = (
         db.query(models.User)
-        .filter(models.User.email == email)
+        .filter(func.lower(models.User.email) == normalized_email)
         .first()
     )
 
@@ -109,23 +117,25 @@ def register(
     Register a new user.
     """
 
+    normalized_email = str(data.email).strip().lower()
+
     # Check whether email already exists
     existing_user = (
         db.query(models.User)
-        .filter(models.User.email == data.email)
+        .filter(func.lower(models.User.email) == normalized_email)
         .first()
     )
 
     if existing_user:
         raise HTTPException(
-            status_code=400,
+            status_code=409,
             detail="Email already registered"
         )
 
     # Create new user
     user = models.User(
         name=data.name,
-        email=data.email,
+        email=normalized_email,
         password=auth.hash_password(data.password),
         role=data.role,
         vehicle_type=data.vehicle_type,
@@ -136,8 +146,15 @@ def register(
     )
 
     db.add(user)
-    db.commit()
-    db.refresh(user)
+    try:
+        db.commit()
+        db.refresh(user)
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Email already registered"
+        )
 
     return user
 
@@ -155,9 +172,10 @@ def login(
     Login an existing user and return JWT token.
     """
 
+    normalized_email = str(data.email).strip().lower()
     user = (
         db.query(models.User)
-        .filter(models.User.email == data.email)
+        .filter(func.lower(models.User.email) == normalized_email)
         .first()
     )
 

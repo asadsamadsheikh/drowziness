@@ -73,6 +73,10 @@
     .btn-start:hover { opacity:0.85; }
     .btn-stop { padding:11px 20px; border-radius:9px; border:1px solid var(--border); background:transparent; color:var(--muted2); font-family:'DM Sans',sans-serif; font-size:14px; cursor:pointer; transition:all 0.2s; }
     .btn-stop:hover { border-color:var(--danger); color:var(--danger); }
+    .detection-metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; padding:12px 16px 16px; border-top:1px solid var(--border); }
+    .detection-metrics div { display:flex; flex-direction:column; gap:5px; min-width:0; }
+    .detection-metrics span { color:var(--muted); font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+    .detection-metrics strong { color:var(--text); font-size:12px; font-weight:600; overflow-wrap:anywhere; }
 
     /* Log */
     .log-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); display:flex; flex-direction:column; overflow:hidden; }
@@ -188,6 +192,21 @@
               <button class="btn-start d" id="startBtn" onclick="startDetection()">Start Detection</button>
               <button class="btn-stop" id="stopBtn" onclick="stopDetection()" style="display:none">Stop</button>
             </div>
+            <div class="detection-metrics" aria-live="polite">
+              <div><span>Eye state</span><strong id="eyeStateValue">Waiting for camera</strong></div>
+              <div><span>Left EAR</span><strong id="leftEARValue">—</strong></div>
+              <div><span>Right EAR</span><strong id="rightEARValue">—</strong></div>
+              <div><span>Average EAR</span><strong id="avgEARValue">—</strong></div>
+              <div><span>Mouth aspect ratio</span><strong id="marValue">—</strong></div>
+              <div><span>Mouth activity</span><strong id="mouthActivityValue">—</strong></div>
+              <div><span>Head direction</span><strong id="directionValue">—</strong><button type="button" class="save-btn" style="margin-top:7px;padding:6px 10px;font-size:11px" onclick="calibrateHeadDirection()">Recalibrate forward pose</button></div>
+              <div><span>Inference rate</span><strong id="detectionFPS">—</strong></div>
+            </div>
+            <div class="s-row" style="padding:12px 16px 16px;border-top:1px solid var(--border)">
+              <div><div class="s-label">I am wearing sunglasses / eyes are obstructed</div><div class="s-sub">Prioritize mouth movement and yawn detection when eye landmarks may be unreliable.</div></div>
+              <label class="toggle"><input type="checkbox" id="mouthOnlyMode"><span class="t-slider"></span></label>
+            </div>
+            <p style="padding:0 16px 14px;color:var(--muted);font-size:11px">Sunglasses mode is user-selected because this face-landmark model does not reliably classify sunglasses automatically. Yawn and approximate head-direction monitoring remain active in both modes. Keep facing forward during initial calibration; recalibrate if the camera position changes.</p>
           </div>
           <div class="log-card">
             <div class="log-hdr">Detection Log</div>

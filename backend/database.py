@@ -1,63 +1,59 @@
+
 from pathlib import Path
+import os
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine, event
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-
-# ============================================================
-# DATABASE LOCATION
-# ============================================================
-
-# Get the folder where this database.py file is located
+# Database location
 BASE_DIR = Path(__file__).resolve().parent
+DEFAULT_DATABASE_PATH = BASE_DIR / "drowziness.db"
 
-# SQLite database file
-DATABASE_URL = f"sqlite:///{BASE_DIR / 'drowziness.db'}"
+# Render persistent disks can override the default without changing the project.
+configured_path = os.getenv("DROWZINESS_DATABASE_PATH")
+DATABASE_PATH = Path(configured_path).expanduser() if configured_path else DEFAULT_DATABASE_PATH
+DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
+DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
-
-# ============================================================
-# DATABASE ENGINE
-# ============================================================
-
+# SQLite engine
 engine = create_engine(
     DATABASE_URL,
     connect_args={
-        "check_same_thread": False
-    }
+        "check_same_thread": False,
+        "timeout": 15,
+    },
+    pool_size=5,
+    max_overflow=5,
+    pool_pre_ping=True,
 )
 
+# Configure every new SQLite connection
+@event.listens_for(engine, "connect")
+def configure_sqlite(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.execute("PRAGMA busy_timeout=15000")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.close()
 
-# ============================================================
-# DATABASE SESSION
-# ============================================================
+# Enable Write-Ahead Logging
+with engine.connect() as connection:
+    connection.exec_driver_sql("PRAGMA journal_mode=WAL")
 
+# Database sessions
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
-    bind=engine
+    bind=engine,
+    expire_on_commit=False
 )
 
-
-# ============================================================
-# BASE CLASS
-# ============================================================
-
+# Base model
 Base = declarative_base()
 
-
-# ============================================================
-# DATABASE CONNECTION
-# ============================================================
-
+# Database dependency
 def get_db():
-    """
-    Create a database session for each request.
-    The session is automatically closed after the request.
-    """
-
     db = SessionLocal()
-
     try:
         yield db
     finally:
